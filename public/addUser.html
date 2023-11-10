@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>添加用户</title>
+  <script src="../axios.min.js"></script>
+</head>
+<body>
+<div id="add">添加用户</div><br>
+<div id="addUser">
+  <div id="item">请输入学号：<input class="itemInput" id="studentNumber"></div>
+  <div id="item">请输入密码：<input class="itemInput" id="pwd"></div>
+  <div id="pwdWord">密码位数3~16位，由数字、大小写字母组成</div>
+  <div id="item">请输入手机号：<input class="itemInput" id="phone"></div>
+</div>
+<span id="warningMsg"></span>
+<button id="itemButton">提交</button>
+<button id="backButton">返回信息门户</button>
+</body>
+
+<script type="module">
+  const btn=document.querySelector('#itemButton')
+  const msg=document.querySelector('#warningMsg')
+  const stuInput=document.querySelector('#studentNumber')
+  const pwdInput=document.querySelector('#pwd')
+  const phoneInput=document.querySelector('#phone')
+  const backBtn=document.querySelector('#backButton')
+
+  backBtn.addEventListener('click',()=>{
+    window.history.back();
+  })
+
+  btn.addEventListener('click',()=>{
+    msg.style.color='red'
+
+    stuInput.value=stuInput.value.replace(/(^\s*)|(\s*$)/g, "");
+    pwdInput.value=pwdInput.value.replace(/(^\s*)|(\s*$)/g, "");
+    phoneInput.value=phoneInput.value.replace(/(^\s*)|(\s*$)/g, "");
+    if(stuInput.value===''){
+      msg.innerHTML='请输入学号!'
+    }
+    else if(stuInput.value!==''&&pwdInput.value===''){
+      msg.innerHTML='请输入密码!'
+    }
+    else if(stuInput.value!==''&&pwdInput.value!==''&&phoneInput.value===''){
+      msg.innerHTML='请输入手机号！'
+    }
+    else if(stuInput.value!==''&&pwdInput.value!==''&&phoneInput.value!=='') {
+      msg.innerHTML = ''
+      let ver = true
+      //判断密码是否合法
+      const reg = /^[0-9a-zA-Z]{3,16}$/
+      if (reg.test(pwdInput.value) === false) {
+        ver = false;
+        msg.innerHTML = '输入的密码不合法!'
+      }
+      if (ver === true) {
+        axios.get('http://127.0.0.1:3000/users').then(
+                response => {
+                  let ifExist = false
+                  let userList = response.data;
+                  //判断是否存在用户
+                  for (let i = 0; i < userList.length; i++) {
+                    if ((parseInt(stuInput.value) === userList[i].studentNumber)) {
+                      ifExist = true;
+                      break;
+                    }
+                  }
+                  if (ifExist === true) {
+                    msg.innerHTML = '用户已存在！'
+                  } else if (ifExist === false) {
+                    axios({
+                      method: "put",
+                      url: "http://127.0.0.1:3000/users",
+                      params: {
+                        type: 'addUser',
+                        studentNumber: stuInput.value,
+                        pwd: pwdInput.value,
+                        phone: phoneInput.value
+                      }
+                    }).then(res => {
+                      msg.style.color = 'blue'
+                      msg.innerHTML = '添加用户成功！'
+                    })
+                  }
+                },
+                error => {
+                  msg.innerHTML = '获取后台数据失败';
+                  console.log(error.message)
+                }
+        )
+      }
+    }
+  })
+</script>
+
+<style>
+  #addUser{
+    position: absolute;
+    top:30%;
+    left:35%;
+  }
+  #add{
+    position: absolute;
+    left: 44%;
+    font-size: xx-large;
+    top:20%;
+  }
+  #item{
+    padding: 10px;
+    font-size: x-large;
+    font-family: sans-serif;
+  }
+  .itemInput{
+    position: absolute;
+    left: 70%;
+    border-radius: 3px;
+    height: 30px;
+    width: 200px;
+    font-size: 20px;
+    border-color: #cccccc;
+  }
+  #itemButton{
+    width: 421px;
+    height: 65px;
+    background-color: #0083ff;
+    border: none ;
+    color: white;
+    font-size: 25px;
+    border-radius: 7px;
+    position: absolute;
+    top:57%;
+    left:36%;
+  }
+  #itemButton:hover{
+    background-color: #0011e5;
+  }
+
+  #itemButton:active{
+    color: grey;
+  }
+
+  #pwdWord{
+    font-size: large;
+  }
+  #warningMsg{
+    position: absolute;
+    top:53%;
+    left:36%;
+    font-size: large;
+    color: red;
+  }
+
+  #backButton{
+    width: 421px;
+    height: 65px;
+    background-color: #0083ff;
+    border: none ;
+    color: white;
+    font-size: 25px;
+    border-radius: 7px;
+    position: absolute;
+    top:68%;
+    left:36%;
+  }
+  #backButton:hover{
+    background-color: #0011e5;
+  }
+
+  #backButton:active{
+    color: grey;
+  }
+</style>
+</html>
